@@ -33,6 +33,18 @@ param_product_url = '#{$param_product_url}';
 param_product_url = '';
 {/if}
 </script>
+
+{* fix
+ * измененный шаблон, чтобы сделать возможным фильтровать по атрибутным группам комбинаций с помощью слайдера.
+ * для этого нужна еще предварительная настройка: в настройках модуля указать для нужных групп способ фильтрации по чекбоксу (checkbox) и
+ * в следующем ниже массиве перечислить id этих групп через запятую.
+ * значения всех атрибутов, по которым производится фильтрация должны быть числовыми, иначе будут проблемы.
+ * измененные места в шаблоне обозначены меткой fix
+ *}
+{$attribute_group_magic_slider = [4,3]}	{* ID атрибутных групп, для которых нужно сделать слайдер *}
+{$attribute_group_reset = [0]}
+{* /fix *}
+
 <div id="layered_block_left" class="block">
 	<h4 class="title_block">{l s='Catalog' mod='blocklayered'}</h4>
 	<div class="block_content">
@@ -59,6 +71,19 @@ param_product_url = '';
 										{/if}
 									{else}
 										{foreach from=$filter.values key=id_value item=value}
+											{* fix *}
+											{if $filter.filter_type == 0 && $filter.type == 'id_attribute_group' && in_array($filter.id_key, $attribute_group_magic_slider)}
+												{$id_group = $filter.id_key}
+												{if !isset($attribute_group_reset.$id_group)}
+													{$attribute_group_reset.$id_group = 1}
+													<li>
+														<a href="#" rel="" id="id_attribute_group_{$filter.id_key}_cancel" onclick="resetCheckboxes();" title="{l s='Cancel' mod='blocklayered'}">x</a>
+														{$filter.name}
+													</li>
+												{/if}
+												{continue}
+											{/if}
+											{* /fix *}
 											{if $id_value == $filter_key && !is_numeric($filter_value) && ($filter.type eq 'id_attribute_group' || $filter.type eq 'id_feature') || $id_value == $filter_value && $filter.type neq 'id_attribute_group' && $filter.type neq 'id_feature'}
 												<li>
 													<a href="#" rel="layered_{$filter.type_lite}_{$id_value}" title="{l s='Cancel' mod='blocklayered'}">x</a>
@@ -94,7 +119,7 @@ param_product_url = '';
 											<input class="color-option {if isset($value.checked) && $value.checked}on{/if} {if !$value.nbr}disable{/if}" type="button" name="layered_{$filter.type_lite}_{$id_value}" rel="{$id_value}_{$filter.id_key}" id="layered_id_attribute_group_{$id_value}" {if !$value.nbr}disabled="disabled"{/if} style="background: {if isset($value.color)}{if file_exists($col_img_dir|cat:$id_value|cat:'.jpg')}url({$img_col_dir}{$id_value}.jpg){else}{$value.color}{/if}{else}#CCC{/if};" title="{$value.name|escape:html:'UTF-8'}" />
 											{if isset($value.checked) && $value.checked}<input type="hidden" name="layered_{$filter.type_lite}_{$id_value}" value="{$id_value}" />{/if}
 										{else}
-											<input type="checkbox" class="checkbox" name="layered_{$filter.type_lite}_{$id_value}" id="layered_{$filter.type_lite}{if $id_value || $filter.type == 'quantity'}_{$id_value}{/if}" value="{$id_value}{if $filter.id_key}_{$filter.id_key}{/if}"{if isset($value.checked)} checked="checked"{/if}{if !$value.nbr} disabled="disabled"{/if} /> 
+											<input type="checkbox" class="checkbox" name="layered_{$filter.type_lite}_{$id_value}" id="layered_{$filter.type_lite}{if $id_value || $filter.type == 'quantity'}_{$id_value}{/if}" value="{$id_value}{if $filter.id_key}_{$filter.id_key}{/if}"{if isset($value.checked)} checked="checked"{/if}{if !$value.nbr} disabled="disabled"{/if} />
 										{/if}
 										<label for="layered_{$filter.type_lite}_{$id_value}"{if !$value.nbr} class="disabled"{else}{if isset($filter.is_color_group) && $filter.is_color_group} name="layered_{$filter.type_lite}_{$id_value}" class="layered_color" rel="{$id_value}_{$filter.id_key}"{/if}{/if}>
 											{if !$value.nbr}
@@ -115,7 +140,7 @@ param_product_url = '';
 											<input class="radio color-option {if isset($value.checked) && $value.checked}on{/if} {if !$value.nbr}disable{/if}" type="button" name="layered_{$filter.type_lite}_{$id_value}" rel="{$id_value}_{$filter.id_key}" id="layered_id_attribute_group_{$id_value}" {if !$value.nbr}disabled="disabled"{/if} style="background: {if isset($value.color)}{if file_exists($col_img_dir|cat:$id_value|cat:'.jpg')}url({$img_col_dir}{$id_value}.jpg){else}{$value.color}{/if}{else}#CCC{/if};" title="{$value.name|escape:html:'UTF-8'}"/>
 											{if isset($value.checked) && $value.checked}<input type="hidden" name="layered_{$filter.type_lite}_{$id_value}" value="{$id_value}" />{/if}
 										{else}
-											<input type="radio" class="radio layered_{$filter.type_lite}_{$id_value}" name="layered_{$filter.type_lite}{if $filter.id_key}_{$filter.id_key}{else}_1{/if}" id="layered_{$filter.type_lite}{if $id_value || $filter.type == 'quantity'}_{$id_value}{if $filter.id_key}_{$filter.id_key}{/if}{/if}" value="{$id_value}{if $filter.id_key}_{$filter.id_key}{/if}"{if isset($value.checked)} checked="checked"{/if}{if !$value.nbr} disabled="disabled"{/if} /> 
+											<input type="radio" class="radio layered_{$filter.type_lite}_{$id_value}" name="layered_{$filter.type_lite}{if $filter.id_key}_{$filter.id_key}{else}_1{/if}" id="layered_{$filter.type_lite}{if $id_value || $filter.type == 'quantity'}_{$id_value}{if $filter.id_key}_{$filter.id_key}{/if}{/if}" value="{$id_value}{if $filter.id_key}_{$filter.id_key}{/if}"{if isset($value.checked)} checked="checked"{/if}{if !$value.nbr} disabled="disabled"{/if} />
 										{/if}
 										<label for="layered_{$filter.type_lite}_{$id_value}"{if !$value.nbr} class="disabled"{else}{if isset($filter.is_color_group) && $filter.is_color_group} name="layered_{$filter.type_lite}_{$id_value}" class="layered_color" rel="{$id_value}_{$filter.id_key}"{/if}{/if}>
 											{if !$value.nbr}
@@ -221,6 +246,106 @@ param_product_url = '';
 					{/literal}
 					</script>
 					{/if}
+
+					{* fix *}
+					{if $filter.filter_type == 0 && $filter.type == 'id_attribute_group' && in_array($filter.id_key, $attribute_group_magic_slider)}
+						<div id="{$filter.type}_{$filter.id_key}_range_title"></div>
+						<div id="{$filter.type}_{$filter.id_key}_slider"></div>
+						<script type="text/javascript">
+							function resetCheckboxes()
+							{
+								$('#ul_layered_id_attribute_group_{$filter.id_key} input[type="checkbox"]').each(function(){
+									$(this).prop('checked',false);
+								});
+
+								reloadContent();
+							}
+
+							$('#ul_layered_id_attribute_group_{$filter.id_key}').hide();
+
+							var filter = {$filter|json_encode};
+							var sliderVals = new Array();
+							var sliderValueIndex = 0;
+							var sliderValueMax = 0;
+							var sliderValueMin = 0;
+							var sliderNumberChecks = 0;
+
+							// id - идентификаторы атрибутов атрибутной группы (текущей итерации), которые есть при текущих параметрах фильтрации каталога
+							for (var id in filter.values)
+							{
+								// индекс для значений атрибутов, также указывает на их общее количество
+								sliderValueIndex++;
+
+								// все значения атрибутов
+								sliderVals[sliderValueIndex] = filter.values[id]['name'];
+
+								// смотрим, какие из атрибутов выбраны
+								if (filter.values[id].hasOwnProperty('checked'))
+								{
+									// может быть выбрано либо два значения атрибута, либо один (т.е. - макс. и мин. значение диапазона, или когда они равны - одно значение)
+									sliderNumberChecks++;
+
+									// первым идет атрибут с наименьшим значением
+									if(sliderValueMin == 0)
+										sliderValueMin = sliderValueIndex;
+									else
+										sliderValueMax = sliderValueIndex;
+								}
+
+								// если был только один выбран атрибут, то для максимального значения диапазона присвоим значением минимального
+								if(sliderNumberChecks == 1)
+									sliderValueMax = sliderValueMin;
+							}
+
+							// установим заголовок со значением диапазона
+							$('#{$filter.type}_{$filter.id_key}_range_title').html(sliderVals[sliderValueMin] + ' - ' + sliderVals[sliderValueMax]);
+
+							// слайдер
+							$('#{$filter.type}_{$filter.id_key}_slider').slider({
+								range: true,
+								step: 1,
+								min: 1,
+								max: sliderValueIndex,
+								values: [sliderValueMin, sliderValueMax],
+								slide: function(event, ui)
+								{
+									stopAjaxQuery();
+									var current_index;
+
+									// т.к элементами являются чекбоксы, нужно выбрать все, которые находятся в диапазоне со значениями
+									// от выбранного мимального и до максимального, а у остальных убрать выбор
+									$('#ul_layered_id_attribute_group_{$filter.id_key} input[type="checkbox"]').each(function(i)
+									{
+										current_index = i + 1;
+										if (current_index >= ui.values[0] && current_index <= ui.values[1])
+										{
+											$(this).prop('checked',true);
+										}
+										else
+											$(this).prop('checked',false);
+									});
+
+									// меняем заголовок при прокрутке слайдера
+									if (ui.values[0] > 0 && sliderVals[ui.values[0]] !== undefined)
+										$('#{$filter.type}_{$filter.id_key}_range_title').html(sliderVals[ui.values[0]]);
+
+									if(ui.values[1] > 0 && sliderVals[ui.values[1]] !== undefined)
+									{
+										var min_txt = $('#{$filter.type}_{$filter.id_key}_range_title').html();
+										$('#{$filter.type}_{$filter.id_key}_range_title').html((min_txt ? min_txt+' - ' : '') + sliderVals[ui.values[1]]);
+									}
+								},
+								stop: function () {
+									reloadContent();
+								},
+								create: function() {
+									if (sliderValueMax == 0)
+										$('#{$filter.type}_{$filter.id_key}_range_title').html('{l s='Select range' mod='blocklayered'}');
+								}
+							});
+						</script>
+					{/if}
+					{* /fix *}
 				{/foreach}
 			</div>
 			<input type="hidden" name="id_category_layered" value="{$id_category_layered}" />
