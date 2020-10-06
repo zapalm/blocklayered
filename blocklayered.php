@@ -37,7 +37,7 @@ class BlockLayered extends Module
 	{
 		$this->name = 'blocklayered';
 		$this->tab = 'front_office_features';
-		$this->version = '2.2.1';
+		$this->version = '2.3.0';
 		$this->author = 'PrestaShop';
 		$this->need_instance = 0;
 		$this->bootstrap = true;
@@ -2008,6 +2008,11 @@ class BlockLayered extends Module
 		}
 		$this->nbr_products = Db::getInstance()->getValue('SELECT COUNT(*) FROM '._DB_PREFIX_.'cat_filter_restriction', false);
 
+        $inStockFirstReady = (Module::isInstalled('instockfirst')
+            && is_object($inStockFirst = Module::getInstanceByName('instockfirst'))
+            && $inStockFirst->active
+        ); /** @var InStockFirst $inStockFirst */
+
 		if ($this->nbr_products == 0)
 			$this->products = array();
 		else
@@ -2051,7 +2056,7 @@ class BlockLayered extends Module
 				'.Product::sqlStock('p', 0).'
 				WHERE '.$alias_where.'.`active` = 1 AND '.$alias_where.'.`visibility` IN ("both", "catalog")
 				ORDER BY '.Tools::getProductsOrder('by', Tools::getValue('orderby'), true).' '.Tools::getProductsOrder('way', Tools::getValue('orderway')).' , cp.id_product'.
-				' LIMIT '.(((int)$this->page - 1) * $n.','.$n), true, false);
+                ($inStockFirstReady ? '' : ' LIMIT ' . (((int)$this->page - 1) * $n . ',' . $n)), true, false);
 			}
 			else
 			{
@@ -2082,12 +2087,16 @@ class BlockLayered extends Module
 				WHERE '.$alias_where.'.`active` = 1 AND '.$alias_where.'.`visibility` IN ("both", "catalog")
 				GROUP BY product_shop.id_product
 				ORDER BY '.Tools::getProductsOrder('by', Tools::getValue('orderby'), true).' '.Tools::getProductsOrder('way', Tools::getValue('orderway')).' , cp.id_product'.
-				' LIMIT '.(((int)$this->page - 1) * $n.','.$n), true, false);
+                ($inStockFirstReady ? '' : ' LIMIT ' . (((int)$this->page - 1) * $n . ',' . $n)), true, false);
 			}
 		}
 
 		if (Tools::getProductsOrder('by', Tools::getValue('orderby'), true) == 'p.price')
 			Tools::orderbyPrice($this->products, Tools::getProductsOrder('way', Tools::getValue('orderway')));
+
+        if ($inStockFirstReady && [] !== $this->products) {
+            $inStockFirst->moveOutOfStock($this->products, $this->page - 1, $n);
+        }
 
 		return $this->products;
 	}
