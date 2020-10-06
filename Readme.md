@@ -1,13 +1,16 @@
-# Layered navigation block
+# Layered navigation block: the module for PrestaShop 1.6
 
----
+## Description
+The module displays a block with layered navigation filters.
 
-**This module has reached end-of-life and is no longer maintained.**
+Difference of this module from the original: it has the integration with `Sort products in-stock first` module.
 
-It has been remade for PrestaShop 1.7: https://github.com/PrestaShop/ps_facetedsearch
+The official repository is no longer maintained by PrestaShop developers.
+If possible, I will maintain my copy of that repository if someone else needs it.
 
----
+See `releases` to download the module.
 
-## About
+You may buy `Sort products in-stock first` module on [PrestaShop Addons][1] and [ModuleZ][2].
 
-Displays a block with layered navigation filters in PrestaShop 1.6.
+[1]: https://addons.prestashop.com/en/stock-supplier-management/16781-sort-products-in-stock-first.html
+[2]: https://prestashop.modulez.ru/en/frontend-features/25-sort-products-in-stock-first.html
